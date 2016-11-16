@@ -181,7 +181,7 @@ int main() {
 
     char szErrbuf[PCAP_ERRBUF_SIZE];
     szErrbuf[0] = '\0';
-    ppcap = pcap_open_live("wlx18a6f70ed195", 800, 1, 20, szErrbuf);
+    ppcap = pcap_open_live("wlx18a6f70ed195", 800, 1, 5, szErrbuf);
     if (ppcap == NULL) {
         fprintf(stderr, "Unable to open interface %s in pcap: %s\n", "wlx18a6f70ed195", szErrbuf);
         exit(1);
@@ -223,7 +223,8 @@ int main() {
             puts(szProgram);
             puts(pcap_geterr(ppcap));
         } else {
-            printf("RX Filter applied\n");
+            printf("Listening for packets addressed to %02x:%02x:%02x:%02x:%02x:%02x\n",
+                   virtual_mac[0], virtual_mac[1], virtual_mac[2], virtual_mac[3], virtual_mac[4], virtual_mac[5]);
         }
         pcap_freecode(&bpfprogram);
     }
