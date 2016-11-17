@@ -172,9 +172,9 @@ int main(int argc, char *argv[]) {
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-i") == 0 && (i + 1 < argc)) {
-            strncpy(phy_name, argv[i + 1], strlen(argv[i + 1]));
+            sprintf(phy_name, argv[i + 1]);
         } else if (strcmp(argv[i], "-n") == 0 & (i + 1 < argc)) {
-            strncpy(tap_name, argv[i + 1], strlen(argv[i + 1]));
+            sprintf(tap_name, argv[i + 1]);
         }
     }
 
