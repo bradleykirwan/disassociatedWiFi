@@ -11,6 +11,8 @@
 #include "mac.h"
 #include "radiotap.h"
 
+#define DEFAULT_TAP_NAME "wi"
+
 bool running = true;
 __uint8_t packet_buffer[MAX_PACKET_LENGTH];
 pcap_t * ppcap = NULL;
@@ -163,10 +165,29 @@ void set_non_blocking(int tun_fd) {
     }
 }
 
-int main() {
-    // TODO: Take physical interface name from command line arguments
-    char tap_name[IFNAMSIZ];
-    strncpy(tap_name, "wi", 4);
+int main(int argc, char *argv[]) {
+    char tap_name[IFNAMSIZ], phy_name[IFNAMSIZ];
+    tap_name[0] = 0;
+    phy_name[0] = 0;
+
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-i") == 0 && (i + 1 < argc)) {
+            strncpy(phy_name, argv[i + 1], strlen(argv[i + 1]));
+        } else if (strcmp(argv[i], "-n") == 0 & (i + 1 < argc)) {
+            strncpy(tap_name, argv[i + 1], strlen(argv[i + 1]));
+        }
+    }
+
+    // Make sure physical interface provided
+    if (phy_name[0] == 0) {
+        perror("No physical interface name provided.");
+        exit(1);
+    }
+
+    // If tap name not set, use default name
+    if (tap_name[0] == 0) {
+        sprintf(tap_name, DEFAULT_TAP_NAME);
+    }
 
     int tun_fd = tun_alloc(tap_name, IFF_TAP | IFF_NO_PI);
 
@@ -186,9 +207,9 @@ int main() {
 
     char szErrbuf[PCAP_ERRBUF_SIZE];
     szErrbuf[0] = '\0';
-    ppcap = pcap_open_live("wlx18a6f70ed195", 2048, 1, 5, szErrbuf);
+    ppcap = pcap_open_live(phy_name, 2048, 1, 5, szErrbuf);
     if (ppcap == NULL) {
-        fprintf(stderr, "Unable to open interface %s in pcap: %s\n", "wlx18a6f70ed195", szErrbuf);
+        fprintf(stderr, "Unable to open interface %s in pcap: %s\n", phy_name, szErrbuf);
         exit(1);
     }
 

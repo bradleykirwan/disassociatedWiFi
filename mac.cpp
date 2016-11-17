@@ -31,6 +31,5 @@ void inject_packet(__uint8_t* packet, ssize_t length, __uint8_t* packet_buffer, 
     int num_transmitted_bytes = pcap_inject(ppcap, packet_buffer, total_length);
     if (num_transmitted_bytes != total_length) {
         pcap_perror(ppcap, (char *) "Trouble injecting packet");
-        exit(1);
     }
 }
