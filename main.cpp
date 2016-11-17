@@ -115,21 +115,23 @@ void process_received_packet(struct pcap_pkthdr* ppcap_packet_header, __uint8_t*
     __uint8_t *data = payload + sizeof(wifi_packet_header_t);
 
     outgoing_eth_frame.ether_type = wifi_packet_header->ether_type;
-    memcpy(outgoing_eth_frame.data, data, (size_t) bytes);
 
-    write(tun_fd, &outgoing_eth_frame, (size_t) (14 + bytes));
+    ssize_t payload_length = bytes - sizeof(wifi_packet_header_t);
+
+    memcpy(outgoing_eth_frame.data, data, (size_t) payload_length);
+
+    write(tun_fd, &outgoing_eth_frame, (size_t) (14 + payload_length));
 }
 
 void process_data(int tun_fd) {
     __uint8_t buffer[MAX_PACKET_LENGTH];
     memset(&buffer, 0, MAX_PACKET_LENGTH);
     ssize_t nread, retval;
-    __uint8_t* payload;
+    __uint8_t* payload = buffer;
+    struct pcap_pkthdr * ppcap_packet_header = NULL;
 
     while (running) {
-        struct pcap_pkthdr * ppcap_packet_header = NULL;
         // Read incoming physical interface data
-        payload = buffer;
         retval = pcap_next_ex(ppcap, &ppcap_packet_header, (const u_char**)&payload);
         if (retval == 1) {
             // Received a packet
@@ -141,6 +143,9 @@ void process_data(int tun_fd) {
         if (nread > 0) {
             inject_packet((__uint8_t *) &buffer, nread, packet_buffer, ppcap);
         }
+
+        // Sleep for some time (be nice on CPUs)
+        usleep(100);
     }
 }
 
@@ -181,7 +186,7 @@ int main() {
 
     char szErrbuf[PCAP_ERRBUF_SIZE];
     szErrbuf[0] = '\0';
-    ppcap = pcap_open_live("wlx18a6f70ed195", 800, 1, 5, szErrbuf);
+    ppcap = pcap_open_live("wlx18a6f70ed195", 2048, 1, 5, szErrbuf);
     if (ppcap == NULL) {
         fprintf(stderr, "Unable to open interface %s in pcap: %s\n", "wlx18a6f70ed195", szErrbuf);
         exit(1);
