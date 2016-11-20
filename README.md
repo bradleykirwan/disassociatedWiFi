@@ -5,7 +5,7 @@ DisassociatedWiFi creates a virtual network interface (using the Linux TUN/TAP d
 Unlike regular WiFi, this system allows for truly uni-directional communication, as there are no acknowledgements at the data-link layer. The WiFi card still obeys standard CSMA/CA, however, care should be taken to select a channel that is relatively free to maximise the available bandwidth.
 
 ## Features
-* No association - Packets are sent into the air, which able to be received by any number of receivers.
+* No association - Packets are sent into the air (without RTS/CTS packets), which are able to be received by any number of receivers.
 * Uni-directional communication - No acknowledgements or retransmissions at the link-layer.
 * Regular interface - Treat it like any other ethernet interface
 
